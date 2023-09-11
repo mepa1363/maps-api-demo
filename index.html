@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Township Canada Maps API</title>
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.js"></script>
+    <link
+      href="https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+      }
+    </style>
+    <style>
+      #menu {
+        background: #fff;
+        position: absolute;
+        z-index: 1;
+        top: 10px;
+        left: 10px;
+        border-radius: 3px;
+        width: 200px;
+        border: 1px solid rgba(0, 0, 0, 0.4);
+        font-family: "Open Sans", sans-serif;
+      }
+
+      #menu a {
+        font-size: 13px;
+        color: #404040;
+        display: block;
+        margin: 0;
+        padding: 0;
+        padding: 10px;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+        text-align: center;
+      }
+
+      #menu a:last-child {
+        border: none;
+      }
+
+      #menu a:hover {
+        background-color: #f8f8f8;
+        color: #404040;
+      }
+
+      #menu a.active {
+        background-color: #3887be;
+        color: #ffffff;
+      }
+
+      #menu a.active:hover {
+        background: #3074a4;
+      }
+    </style>
+  </head>
+
+  <body>
+    <nav id="menu"></nav>
+    <div id="map"></div>
+    <script>
+      const mapboxAccessToken =
+        "pk.eyJ1IjoidG93bnNoaXBjYW5hZGEiLCJhIjoiY2pzYmVhajNhMDlnaDRibXB0bGZsa2VpeSJ9.WhIPisNxh4T6YFobfDqo0g";
+
+      mapboxgl.accessToken = mapboxAccessToken;
+
+      const map = new mapboxgl.Map({
+        container: "map",
+        style: "mapbox://styles/mapbox/light-v10",
+        zoom: 9,
+        center: [-114, 51],
+        hash: true,
+      });
+
+      const addFeatureLayer = (data) => {
+        map.addSource(data.source.id, {
+          type: "vector",
+          tiles: [
+            `https://dfsu968itb5w9.cloudfront.net/tilesets/${data.tileset.name}/{z}/{x}/{y}.pbf`,
+          ],
+          minzoom: data.source.minZoom,
+          maxzoom: data.source.maxZoom,
+        });
+
+        map.addLayer({
+          id: data.layer.id,
+          type: "line",
+          source: data.source.id,
+          "source-layer": data.tileset.name,
+          minzoom: data.layer.minZoom,
+          maxzoom: data.layer.maxZoom,
+          layout: {
+            "line-join": "miter",
+            "line-cap": "square",
+            visibility: data.visibility ? "visible" : "none",
+          },
+          paint: {
+            "line-color": "#333",
+            "line-width": 1,
+          },
+        });
+      };
+
+      const addLabelLayer = (data) => {
+        map.addSource(data.source.id, {
+          type: "vector",
+          tiles: [
+            `https://dfsu968itb5w9.cloudfront.net/tilesets/${data.tileset.name}/{z}/{x}/{y}.pbf`,
+          ],
+          minzoom: data.source.minZoom,
+          maxzoom: data.source.maxZoom,
+        });
+
+        map.addLayer({
+          id: data.layer.id,
+          type: "symbol",
+          source: data.source.id,
+          "source-layer": data.tileset.name,
+          minzoom: data.layer.minZoom,
+          maxzoom: data.layer.maxZoom,
+          layout: {
+            "symbol-placement": data.layer.placement,
+            "text-anchor": "center",
+            "text-field": data.layer.text,
+            "text-justify": "center",
+            "text-keep-upright": true,
+            "text-size": 14,
+            visibility: data.visibility ? "visible" : "none",
+          },
+          paint: {
+            "text-color": "#333",
+            "text-halo-color": "#dedede",
+            "text-halo-width": 2,
+            "text-halo-blur": 2,
+          },
+        });
+      };
+
+      const addDLSLayers = (data) => {
+        map.addSource(data.source.id, {
+          type: "vector",
+          tiles: [
+            `https://dfsu968itb5w9.cloudfront.net/tilesets/${data.tileset.name}/{z}/{x}/{y}.pbf`,
+          ],
+          minzoom: data.source.minZoom,
+          maxzoom: data.source.maxZoom,
+        });
+
+        data.layers.forEach((layer) => {
+          map.addLayer({
+            id: layer.id,
+            type: "line",
+            source: layer.source,
+            "source-layer": layer.id,
+            minzoom: layer.minZoom,
+            maxzoom: layer.maxZoom,
+            layout: {
+              "line-join": "miter",
+              "line-cap": "square",
+              visibility: data.visibility ? "visible" : "none",
+            },
+            paint: {
+              "line-color": "#333",
+              "line-width": 0.1,
+            },
+          });
+        });
+      };
+
+      const addDLSLabelLayers = (data) => {
+        map.addSource(data.source.id, {
+          type: "vector",
+          tiles: [
+            `https://dfsu968itb5w9.cloudfront.net/tilesets/${data.tileset.name}/{z}/{x}/{y}.pbf`,
+          ],
+          minzoom: data.source.minZoom,
+          maxzoom: data.source.maxZoom,
+        });
+
+        data.layers.forEach((layer) => {
+          map.addLayer({
+            id: layer.id,
+            type: "symbol",
+            source: layer.source,
+            "source-layer": layer.id,
+            minzoom: layer.minZoom,
+            maxzoom: layer.maxZoom,
+            layout: {
+              "symbol-placement": "point",
+              "text-anchor": "center",
+              "text-field": layer.text,
+              "text-justify": "center",
+              "text-keep-upright": true,
+              "text-size": 14,
+              visibility: data.visibility ? "visible" : "none",
+            },
+            paint: {
+              "text-color": "#333",
+              "text-halo-color": "#dedede",
+              "text-halo-width": 2,
+              "text-halo-blur": 2,
+            },
+          });
+        });
+      };
+
+      map.on("load", function () {
+        // Municipal boundaries
+
+        addFeatureLayer({
+          tileset: { name: "municipal_boundaries" },
+          source: {
+            id: "municipal_boundaries_source",
+            minZoom: 0,
+            maxZoom: 12,
+          },
+          layer: { id: "municipal_boundaries", minZoom: 0, maxZoom: 20 },
+          visibility: false,
+        });
+        addLabelLayer({
+          tileset: { name: "municipal_boundaries_label" },
+          source: {
+            id: "municipal_boundaries_label_source",
+            minZoom: 0,
+            maxZoom: 12,
+          },
+          layer: {
+            id: "municipal_boundaries_label",
+            minZoom: 0,
+            maxZoom: 20,
+            text: "{name}",
+            placement: "point",
+          },
+          visibility: false,
+        });
+
+        // Parks and protected areas
+
+        addFeatureLayer({
+          tileset: { name: "parks_and_protected_areas" },
+          source: {
+            id: "parks_and_protected_areas_source",
+            minZoom: 0,
+            maxZoom: 12,
+          },
+          layer: {
+            id: "parks_and_protected_areas",
+            minZoom: 0,
+            maxZoom: 20,
+          },
+          visibility: false,
+        });
+        addLabelLayer({
+          tileset: { name: "parks_and_protected_areas_label" },
+          source: {
+            id: "parks_and_protected_areas_label_source",
+            minZoom: 0,
+            maxZoom: 12,
+          },
+          layer: {
+            id: "parks_and_protected_areas_label",
+            minZoom: 0,
+            maxZoom: 20,
+            text: "{name}",
+            placement: "point",
+          },
+          visibility: false,
+        });
+
+        // Railways
+
+        addFeatureLayer({
+          tileset: { name: "railways" },
+          source: { id: "railways_source", minZoom: 0, maxZoom: 12 },
+          layer: { id: "railways", minZoom: 0, maxZoom: 20 },
+          visibility: false,
+        });
+        addLabelLayer({
+          tileset: { name: "railways" },
+          source: { id: "railways_label_source", minZoom: 0, maxZoom: 12 },
+          layer: {
+            id: "railways_label",
+            minZoom: 0,
+            maxZoom: 20,
+            text: "{name}",
+            placement: "line",
+          },
+          visibility: false,
+        });
+
+        // Roads
+
+        addFeatureLayer({
+          tileset: { name: "roads" },
+          source: { id: "roads_source", minZoom: 0, maxZoom: 12 },
+          layer: { id: "roads", minZoom: 0, maxZoom: 20 },
+          visibility: false,
+        });
+        addLabelLayer({
+          tileset: { name: "roads" },
+          source: { id: "roads_label_source", minZoom: 0, maxZoom: 12 },
+          layer: {
+            id: "roads_label",
+            minZoom: 0,
+            maxZoom: 20,
+            text: "{name}m",
+            placement: "line",
+          },
+          visibility: false,
+        });
+
+        // Elevation
+
+        addFeatureLayer({
+          tileset: { name: "elevation" },
+          source: { id: "elevation_source", minZoom: 0, maxZoom: 12 },
+          layer: { id: "elevation", minZoom: 0, maxZoom: 20 },
+        });
+        addLabelLayer({
+          tileset: { name: "elevation" },
+          source: { id: "elevation_label_source", minZoom: 0, maxZoom: 12 },
+          layer: {
+            id: "elevation_label",
+            minZoom: 0,
+            maxZoom: 20,
+            text: "{elevation}m",
+            placement: "line",
+          },
+          visibility: false,
+        });
+
+        // DLS Grid
+
+        addDLSLayers({
+          tileset: { name: "grid/dls/twp" },
+          source: {
+            id: "twp",
+            minZoom: 0,
+            maxZoom: 14,
+          },
+          layers: [
+            { id: "ab_twp", source: "twp", minZoom: 0, maxZoom: 12 },
+            { id: "bc_twp", source: "twp", minZoom: 0, maxZoom: 12 },
+            { id: "mb_twp", source: "twp", minZoom: 0, maxZoom: 12 },
+            { id: "sk_twp", source: "twp", minZoom: 0, maxZoom: 12 },
+          ],
+          visibility: true,
+        });
+        addDLSLabelLayers({
+          tileset: { name: "grid/dls/twp_label" },
+          source: {
+            id: "twp_label",
+            minZoom: 0,
+            maxZoom: 14,
+          },
+          layers: [
+            {
+              id: "ab_twp_label",
+              source: "twp_label",
+              minZoom: 10,
+              maxZoom: 12,
+              text: "{descriptor}",
+            },
+            {
+              id: "bc_twp_label",
+              source: "twp_label",
+              minZoom: 10,
+              maxZoom: 12,
+              text: "{descriptor}",
+            },
+            {
+              id: "mb_twp_label",
+              source: "twp_label",
+              minZoom: 10,
+              maxZoom: 12,
+              text: "{descriptor}",
+            },
+            {
+              id: "sk_twp_label",
+              source: "twp_label",
+              minZoom: 10,
+              maxZoom: 12,
+              text: "{descriptor}",
+            },
+          ],
+          visibility: true,
+        });
+
+        addDLSLayers({
+          tileset: { name: "grid/dls/sec" },
+          source: {
+            id: "sec",
+            minZoom: 9,
+            maxZoom: 14,
+          },
+          layers: [
+            { id: "ab_sec", source: "sec", minZoom: 9, maxZoom: 21 },
+            { id: "bc_sec", source: "sec", minZoom: 9, maxZoom: 21 },
+            { id: "mb_sec", source: "sec", minZoom: 9, maxZoom: 21 },
+            { id: "sk_sec", source: "sec", minZoom: 9, maxZoom: 21 },
+          ],
+          visibility: true,
+        });
+        addDLSLabelLayers({
+          tileset: { name: "grid/dls/sec_label" },
+          source: {
+            id: "sec_label",
+            minZoom: 9,
+            maxZoom: 14,
+          },
+          layers: [
+            {
+              id: "ab_sec_label",
+              source: "sec_label",
+              minZoom: 12,
+              maxZoom: 20,
+              text: "{section}",
+            },
+            {
+              id: "bc_sec_label",
+              source: "sec_label",
+              minZoom: 12,
+              maxZoom: 20,
+              text: "{section}",
+            },
+            {
+              id: "mb_sec_label",
+              source: "sec_label",
+              minZoom: 12,
+              maxZoom: 20,
+              text: "{section}",
+            },
+            {
+              id: "sk_sec_label",
+              source: "sec_label",
+              minZoom: 12,
+              maxZoom: 20,
+              text: "{section}",
+            },
+          ],
+          visibility: true,
+        });
+
+        addDLSLayers({
+          tileset: { name: "grid/dls/lsd" },
+          source: {
+            id: "lsd",
+            minZoom: 9,
+            maxZoom: 14,
+          },
+          layers: [
+            { id: "ab_lsd", source: "lsd", minZoom: 12, maxZoom: 20 },
+            { id: "bc_lsd", source: "lsd", minZoom: 12, maxZoom: 20 },
+            { id: "mb_lsd", source: "lsd", minZoom: 12, maxZoom: 20 },
+            { id: "sk_lsd", source: "lsd", minZoom: 12, maxZoom: 20 },
+          ],
+          visibility: true,
+        });
+        addDLSLabelLayers({
+          tileset: { name: "grid/dls/lsd_label" },
+          source: {
+            id: "lsd_label",
+            minZoom: 9,
+            maxZoom: 14,
+          },
+          layers: [
+            {
+              id: "ab_lsd_label",
+              source: "lsd_label",
+              minZoom: 12,
+              maxZoom: 20,
+              text: "{lsd}",
+            },
+            {
+              id: "bc_lsd_label",
+              source: "lsd_label",
+              minZoom: 12,
+              maxZoom: 20,
+              text: "{lsd}",
+            },
+            {
+              id: "mb_lsd_label",
+              source: "lsd_label",
+              minZoom: 12,
+              maxZoom: 20,
+              text: "{lsd}",
+            },
+            {
+              id: "sk_lsd_label",
+              source: "lsd_label",
+              minZoom: 12,
+              maxZoom: 20,
+              text: "{lsd}",
+            },
+          ],
+          visibility: true,
+        });
+
+        map.on("idle", () => {
+          // Enumerate ids of the layers.
+          const toggleableLayerIds = [
+            { id: "municipal_boundaries", active: false },
+            { id: "parks_and_protected_areas", active: false },
+            { id: "railways", active: false },
+            { id: "roads", active: false },
+            { id: "elevation", active: false },
+            { id: "ab_twp", active: true },
+            { id: "ab_sec", active: true },
+            { id: "ab_lsd", active: true },
+          ];
+
+          // Set up the corresponding toggle button for each layer.
+          for (const toggleableLayer of toggleableLayerIds) {
+            // Skip layers that already have a button set up.
+            if (document.getElementById(toggleableLayer.id)) {
+              continue;
+            }
+
+            // Create a link.
+            const link = document.createElement("a");
+            link.id = toggleableLayer.id;
+            link.href = "#";
+            link.textContent = toggleableLayer.id;
+            link.className = toggleableLayer.active ? "active" : "";
+
+            // Show or hide layer when the toggle is clicked.
+            link.onclick = function (e) {
+              const clickedLayer = this.textContent;
+              e.preventDefault();
+              e.stopPropagation();
+
+              const visibility = map.getLayoutProperty(
+                clickedLayer,
+                "visibility"
+              );
+
+              // Toggle layer visibility by changing the layout object's visibility property.
+              if (visibility === "visible") {
+                map.setLayoutProperty(clickedLayer, "visibility", "none");
+                map.setLayoutProperty(
+                  `${clickedLayer}_label`,
+                  "visibility",
+                  "none"
+                );
+                this.className = "";
+              } else {
+                this.className = "active";
+                map.setLayoutProperty(clickedLayer, "visibility", "visible");
+                map.setLayoutProperty(
+                  `${clickedLayer}_label`,
+                  "visibility",
+                  "visible"
+                );
+              }
+            };
+
+            const layers = document.getElementById("menu");
+            layers.appendChild(link);
+          }
+        });
+
+        map.addControl(new mapboxgl.NavigationControl());
+      });
+    </script>
+  </body>
+</html>
