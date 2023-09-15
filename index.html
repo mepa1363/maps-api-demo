@@ -511,6 +511,39 @@
           visibility: true,
         });
 
+        // NTS Layer
+
+        addDLSLayers({
+          tileset: { name: "grid/nts/series" },
+          source: {
+            id: "bc_series",
+            minZoom: 0,
+            maxZoom: 14,
+          },
+          layers: [
+            { id: "bc_series", source: "bc_series", minZoom: 0, maxZoom: 14 },
+          ],
+          visibility: true,
+        });
+        addDLSLabelLayers({
+          tileset: { name: "grid/nts/series_label" },
+          source: {
+            id: "bc_series_label",
+            minZoom: 0,
+            maxZoom: 14,
+          },
+          layers: [
+            {
+              id: "bc_series_label",
+              source: "bc_series_label",
+              minZoom: 7,
+              maxZoom: 14,
+              text: "{descriptor}",
+            },
+          ],
+          visibility: true,
+        });
+
         map.on("idle", () => {
           // Enumerate ids of the layers.
           const toggleableLayerIds = [
