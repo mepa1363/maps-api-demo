@@ -75,7 +75,7 @@
     <div id="map"></div>
     <script>
       const mapboxAccessToken =
-        "pk.eyJ1IjoidG93bnNoaXBjYW5hZGEiLCJhIjoiY2pzYmVhajNhMDlnaDRibXB0bGZsa2VpeSJ9.WhIPisNxh4T6YFobfDqo0g";
+        "pk.eyJ1IjoibWVwYTEzNjMiLCJhIjoiY2xwaWw0cGV3MDBmaTJqcWgyYzc2MjkwYyJ9.mLM2otbz_3aaNgmg7MVHhw";
 
       mapboxgl.accessToken = mapboxAccessToken;
 
@@ -278,6 +278,60 @@
             maxZoom: 20,
             text: "{name}",
             placement: "point",
+          },
+          visibility: false,
+        });
+
+        // Water bodies
+
+        addFeatureLayer({
+          tileset: { name: "water_bodies" },
+          source: {
+            id: "water_bodies_source",
+            minZoom: 0,
+            maxZoom: 12,
+          },
+          layer: {
+            id: "water_bodies",
+            minZoom: 0,
+            maxZoom: 20,
+          },
+          visibility: false,
+        });
+        addLabelLayer({
+          tileset: { name: "water_bodies_label" },
+          source: {
+            id: "water_bodies_label_source",
+            minZoom: 0,
+            maxZoom: 12,
+          },
+          layer: {
+            id: "water_bodies_label",
+            minZoom: 0,
+            maxZoom: 20,
+            text: "{name}",
+            placement: "point",
+          },
+          visibility: false,
+        });
+
+        // Watercourses
+
+        addFeatureLayer({
+          tileset: { name: "watercourses" },
+          source: { id: "watercourses_source", minZoom: 0, maxZoom: 12 },
+          layer: { id: "watercourses", minZoom: 0, maxZoom: 20 },
+          visibility: false,
+        });
+        addLabelLayer({
+          tileset: { name: "watercourses" },
+          source: { id: "watercourses_label_source", minZoom: 0, maxZoom: 12 },
+          layer: {
+            id: "watercourses_label",
+            minZoom: 0,
+            maxZoom: 20,
+            text: "{name}",
+            placement: "line",
           },
           visibility: false,
         });
@@ -523,7 +577,7 @@
           layers: [
             { id: "bc_series", source: "bc_series", minZoom: 0, maxZoom: 14 },
           ],
-          visibility: true,
+          visibility: false,
         });
         addDLSLabelLayers({
           tileset: { name: "grid/nts/series_label" },
@@ -541,7 +595,7 @@
               text: "{descriptor}",
             },
           ],
-          visibility: true,
+          visibility: false,
         });
 
         map.on("idle", () => {
@@ -552,9 +606,12 @@
             { id: "railways", active: false },
             { id: "roads", active: false },
             { id: "elevation", active: false },
+            { id: "water_bodies", active: false },
+            { id: "watercourses", active: false },
             { id: "ab_twp", active: true },
             { id: "ab_sec", active: true },
             { id: "ab_lsd", active: true },
+            { id: "bc_series", active: false },
           ];
 
           // Set up the corresponding toggle button for each layer.
